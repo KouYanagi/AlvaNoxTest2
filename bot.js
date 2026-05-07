@@ -82,7 +82,26 @@ client.on(Events.InteractionCreate, async interaction => {
   }
 });
 
-client.login(DISCORD_TOKEN);
+client.login(DISCORD_TOKEN)
+  .then(() => {
+    console.log('Discordログイン処理開始');
+  })
+  .catch(err => {
+    console.error('Discordログイン失敗');
+    console.error(err);
+  });
+
+client.on('error', err => {
+  console.error('Client Error:', err);
+});
+
+process.on('unhandledRejection', err => {
+  console.error('Unhandled Rejection:', err);
+});
+
+process.on('uncaughtException', err => {
+  console.error('Uncaught Exception:', err);
+});
 
 // Render用ヘルスチェックサーバー
 const app = express();
