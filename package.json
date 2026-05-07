@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "bot.js",
   "scripts": {
-    "start": "node bot.js"
+    "start": "node --dns-result-order=ipv4first bot.js"
   },
   "engines": {
     "node": "20.x"
