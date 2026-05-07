@@ -1,11 +1,11 @@
+require('dotenv').config();
+
 console.log('ENV CHECK', {
   hasToken: !!process.env.DISCORD_TOKEN,
   hasClientId: !!process.env.CLIENT_ID,
   hasGuildIds: !!process.env.GUILD_IDS,
   hasGasUrl: !!process.env.GAS_URL
 });
-
-require('dotenv').config();
 
 const express = require('express');
 const {
@@ -50,6 +50,8 @@ async function registerCommands() {
     .map(id => id.trim())
     .filter(Boolean);
 
+  console.log('登録対象ギルド:', guildIds);
+
   for (const guildId of guildIds) {
     await rest.put(
       Routes.applicationGuildCommands(CLIENT_ID, guildId),
@@ -61,8 +63,14 @@ async function registerCommands() {
 }
 
 client.once(Events.ClientReady, async () => {
-  console.log(`ログイン完了: ${client.user.tag}`);
-  await registerCommands();
+  console.log(`✅ ログイン完了: ${client.user.tag}`);
+
+  try {
+    await registerCommands();
+  } catch (err) {
+    console.error('❌ スラッシュコマンド登録失敗');
+    console.error(err);
+  }
 });
 
 client.on(Events.InteractionCreate, async interaction => {
@@ -77,26 +85,20 @@ client.on(Events.InteractionCreate, async interaction => {
     const channelId = interaction.channelId;
     const url = `${GAS_URL}?mode=lostCheck&channelId=${encodeURIComponent(channelId)}`;
 
+    console.log('GAS呼び出し:', url);
+
     const res = await fetch(url);
     const data = await res.json();
 
     await interaction.editReply(data.message || '取得できませんでした。');
-
   } catch (e) {
+    console.error('落選確認エラー:', e);
+
     await interaction.editReply(
       `落選確認でエラーが発生しました。\n${e.message}`
     );
   }
 });
-
-client.login(DISCORD_TOKEN)
-  .then(() => {
-    console.log('Discordログイン処理開始');
-  })
-  .catch(err => {
-    console.error('Discordログイン失敗');
-    console.error(err);
-  });
 
 client.on('error', err => {
   console.error('Client Error:', err);
@@ -112,7 +114,7 @@ process.on('uncaughtException', err => {
 
 // Render用ヘルスチェックサーバー
 const app = express();
-const port = PORT || 8000;
+const port = PORT || 10000;
 
 app.get('/', (req, res) => {
   res.json({
@@ -125,3 +127,15 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`ヘルスチェックサーバー起動: port ${port}`);
 });
+
+// Discordログイン
+console.log('Discordログイン開始直前');
+
+client.login(DISCORD_TOKEN)
+  .then(() => {
+    console.log('Discordログイン処理開始OK');
+  })
+  .catch(err => {
+    console.error('❌ Discordログイン失敗');
+    console.error(err);
+  });
