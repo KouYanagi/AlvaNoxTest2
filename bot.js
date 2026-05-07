@@ -125,11 +125,3 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`ヘルスチェックサーバー起動: port ${port}`);
 });
-
-client.once("ready", () => {
-  console.log(`✅ Botログイン成功: ${client.user.tag}`);
-});
-
-client.login(process.env.DISCORD_TOKEN).catch((error) => {
-  console.error("❌ Discordログイン失敗:", error);
-});
