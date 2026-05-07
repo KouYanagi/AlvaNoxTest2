@@ -1,3 +1,10 @@
+console.log('ENV CHECK', {
+  hasToken: !!process.env.DISCORD_TOKEN,
+  hasClientId: !!process.env.CLIENT_ID,
+  hasGuildIds: !!process.env.GUILD_IDS,
+  hasGasUrl: !!process.env.GAS_URL
+});
+
 require('dotenv').config();
 
 const express = require('express');
