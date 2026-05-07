@@ -23,12 +23,33 @@ client.on('warn', msg => console.warn('Discord Warn:', msg));
 client.on('error', err => console.error('Client Error:', err));
 client.on('shardError', err => console.error('Shard Error:', err));
 
+async function testDiscordApi() {
+  console.log('Discord API疎通確認開始');
+
+  const res = await fetch('https://discord.com/api/v10/gateway/bot', {
+    headers: {
+      Authorization: `Bot ${token}`
+    }
+  });
+
+  console.log('Discord API status:', res.status);
+
+  const text = await res.text();
+  console.log('Discord API response:', text.slice(0, 300));
+}
+
 console.log('Discordログイン開始');
 
-client.login(token)
-  .then(() => console.log('login() resolved'))
+testDiscordApi()
+  .then(() => {
+    console.log('Discord API疎通確認OK');
+    return client.login(token);
+  })
+  .then(() => {
+    console.log('login() resolved');
+  })
   .catch(err => {
-    console.error('❌ login() failed');
+    console.error('❌ Discord接続失敗');
     console.error(err);
   });
 
