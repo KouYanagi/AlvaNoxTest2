@@ -1,53 +1,32 @@
 require('dotenv').config();
 
 const express = require('express');
-const { Client, GatewayIntentBits, Events } = require('discord.js');
+const WebSocket = require('ws');
+
+const port = process.env.PORT || 10000;
 
 console.log('Node version:', process.version);
 
-const token = process.env.DISCORD_TOKEN?.trim();
-const port = process.env.PORT || 10000;
+console.log('WebSocket接続開始');
 
-if (!token) throw new Error('DISCORD_TOKEN が未設定です');
+const ws = new WebSocket('wss://gateway.discord.gg/?v=10&encoding=json');
 
-const client = new Client({
-  intents: [GatewayIntentBits.Guilds]
+ws.on('open', () => {
+  console.log('✅ WebSocket接続成功');
 });
 
-client.once(Events.ClientReady, () => {
-  console.log(`✅ Botログイン成功: ${client.user.tag}`);
+ws.on('message', data => {
+  console.log('📩 Gateway message:', data.toString().slice(0, 200));
 });
 
-client.on('warn', msg => {
-  console.warn('Discord Warn:', msg);
+ws.on('error', err => {
+  console.error('❌ WebSocket error');
+  console.error(err);
 });
 
-client.on('error', err => {
-  console.error('Client Error:', err);
+ws.on('close', (code, reason) => {
+  console.log('WebSocket closed:', code, reason.toString());
 });
-
-client.on('shardError', err => {
-  console.error('Shard Error:', err);
-});
-
-process.on('unhandledRejection', err => {
-  console.error('Unhandled Rejection:', err);
-});
-
-process.on('uncaughtException', err => {
-  console.error('Uncaught Exception:', err);
-});
-
-console.log('Discordログイン開始');
-
-client.login(token)
-  .then(() => {
-    console.log('login() resolved');
-  })
-  .catch(err => {
-    console.error('❌ login() failed');
-    console.error(err);
-  });
 
 const app = express();
 
