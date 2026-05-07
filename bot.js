@@ -131,7 +131,14 @@ app.listen(port, () => {
 // Discordログイン
 console.log('Discordログイン開始直前');
 
-client.login(DISCORD_TOKEN)
+const token = DISCORD_TOKEN.trim();
+
+console.log('Discordログイン開始直前');
+console.log('TOKEN文字数:', token.length);
+console.log('TOKEN先頭:', token.slice(0, 6));
+console.log('TOKEN末尾:', token.slice(-6));
+
+client.login(token)
   .then(() => {
     console.log('Discordログイン処理開始OK');
   })
