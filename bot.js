@@ -1,12 +1,5 @@
 require('dotenv').config();
 
-console.log('ENV CHECK', {
-  hasToken: !!process.env.DISCORD_TOKEN,
-  hasClientId: !!process.env.CLIENT_ID,
-  hasGuildIds: !!process.env.GUILD_IDS,
-  hasGasUrl: !!process.env.GAS_URL
-});
-
 const express = require('express');
 const {
   Client,
@@ -26,10 +19,19 @@ const {
   PORT
 } = process.env;
 
+console.log('ENV CHECK', {
+  hasToken: !!DISCORD_TOKEN,
+  hasClientId: !!CLIENT_ID,
+  hasGuildIds: !!GUILD_IDS,
+  hasGasUrl: !!GAS_URL
+});
+
 if (!DISCORD_TOKEN) throw new Error('DISCORD_TOKEN が未設定です');
 if (!CLIENT_ID) throw new Error('CLIENT_ID が未設定です');
 if (!GUILD_IDS) throw new Error('GUILD_IDS が未設定です');
 if (!GAS_URL) throw new Error('GAS_URL が未設定です');
+
+const token = DISCORD_TOKEN.trim();
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds]
@@ -42,7 +44,7 @@ const commands = [
     .toJSON()
 ];
 
-const rest = new REST({ version: '10' }).setToken(DISCORD_TOKEN);
+const rest = new REST({ version: '10' }).setToken(token);
 
 async function registerCommands() {
   const guildIds = GUILD_IDS
@@ -100,8 +102,20 @@ client.on(Events.InteractionCreate, async interaction => {
   }
 });
 
+client.on('debug', msg => {
+  console.log('Discord Debug:', msg);
+});
+
+client.on('warn', msg => {
+  console.warn('Discord Warn:', msg);
+});
+
 client.on('error', err => {
   console.error('Client Error:', err);
+});
+
+client.on('shardError', err => {
+  console.error('Shard Error:', err);
 });
 
 process.on('unhandledRejection', err => {
@@ -129,10 +143,6 @@ app.listen(port, () => {
 });
 
 // Discordログイン
-console.log('Discordログイン開始直前');
-
-const token = DISCORD_TOKEN.trim();
-
 console.log('Discordログイン開始直前');
 console.log('TOKEN文字数:', token.length);
 console.log('TOKEN先頭:', token.slice(0, 6));
